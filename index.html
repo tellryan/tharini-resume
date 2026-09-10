@@ -123,7 +123,83 @@ section{padding-block:clamp(76px,10vw,132px);scroll-margin-top:76px;position:rel
 }
 .nav-links a:hover{color:var(--cyan);border-color:var(--line-strong);background:rgba(0,240,255,.05)}
 .scanbar{height:1px;background:linear-gradient(90deg,var(--cyan),var(--teal));width:0%;transition:width .1s linear}
-@media(max-width:860px){.nav-links{display:none}}
+
+/* standing line — mobile and tablet only; desktop bar is unchanged */
+.standing{
+  display:none;flex:1 1 auto;min-width:0;text-align:center;
+  font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.11em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background-image:linear-gradient(100deg,
+    #7C879A 0%,#7C879A 34%,
+    #0EA5E9 43%,#00F0FF 49%,#EAFDFF 52%,#00F0FF 55%,#0EA5E9 61%,
+    #7C879A 70%,#7C879A 100%);
+  background-size:280% 100%;background-position:130% 0;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+  animation:shimmer 5s linear infinite;
+}
+@keyframes shimmer{to{background-position:-60% 0}}
+
+/* menu toggle */
+.navtoggle{
+  display:none;flex:none;width:38px;height:38px;place-items:center;position:relative;
+  background:var(--glass);border:1px solid var(--line);border-radius:3px;cursor:pointer;
+  transition:.24s var(--ease);
+}
+.navtoggle:hover,.navtoggle[aria-expanded="true"]{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(0,240,255,.25)}
+.navtoggle i{position:absolute;left:11px;right:11px;height:1.5px;background:var(--paper);transition:.32s var(--ease)}
+.navtoggle i:nth-child(1){transform:translateY(-5px)}
+.navtoggle i:nth-child(3){transform:translateY(5px)}
+.navtoggle[aria-expanded="true"] i{background:var(--cyan)}
+.navtoggle[aria-expanded="true"] i:nth-child(1){transform:rotate(45deg)}
+.navtoggle[aria-expanded="true"] i:nth-child(2){opacity:0;transform:scaleX(.2)}
+.navtoggle[aria-expanded="true"] i:nth-child(3){transform:rotate(-45deg)}
+
+/* dropdown */
+.drawer{
+  display:none;position:absolute;top:100%;left:0;right:0;
+  background:rgba(11,15,25,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+  clip-path:inset(0 0 100% 0);transition:clip-path .42s var(--ease);
+  padding:6px var(--gutter) 16px;
+}
+.nav.open .drawer{clip-path:inset(0 0 0 0)}
+.nav.open{background:rgba(11,15,25,.78);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom-color:var(--line)}
+.drawer a,.drawer .dl{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+  font-family:var(--mono);font-size:13px;color:var(--paper);
+  padding:14px 2px;border-bottom:1px solid var(--line);
+  opacity:0;transform:translateY(-8px);
+  transition:opacity .4s var(--ease),transform .4s var(--ease),color .2s;
+}
+.nav.open .drawer a,.nav.open .drawer .dl{opacity:1;transform:none}
+.nav.open .drawer > :nth-child(1){transition-delay:.06s}
+.nav.open .drawer > :nth-child(2){transition-delay:.11s}
+.nav.open .drawer > :nth-child(3){transition-delay:.16s}
+.nav.open .drawer > :nth-child(4){transition-delay:.21s}
+.nav.open .drawer > :nth-child(5){transition-delay:.26s}
+.nav.open .drawer > :nth-child(6){transition-delay:.31s}
+.drawer a:hover,.drawer a:active{color:var(--cyan)}
+.drawer a .n{font-size:10px;color:var(--ash-dim);letter-spacing:.1em}
+.drawer .dl{
+  border-bottom:0;margin-top:12px;justify-content:center;gap:9px;cursor:pointer;
+  background:var(--cyan);color:var(--void);font-weight:600;border-radius:3px;padding:14px;border:0;
+}
+.drawer .dl svg{width:14px;height:14px;stroke-width:2}
+
+/* 660–860: links still fit inline, shimmer takes the middle */
+@media(max-width:860px){
+  .nav-in{gap:14px}
+  .standing{display:block}
+  .nav-links a{font-size:11.5px;padding:8px 11px}
+}
+/* below 660: links move into the dropdown */
+@media(max-width:659px){
+  .nav-links{display:none}
+  .navtoggle{display:grid}
+  .drawer{display:block}
+}
+@media(max-width:520px){.standing{font-size:9.5px;letter-spacing:.08em}}
 
 /* ============================================================
    HERO
@@ -583,6 +659,7 @@ footer{border-top:1px solid var(--line);padding-block:34px}
   html{scroll-behavior:auto}
   [data-reveal]{opacity:1;transform:none}
   .card{transform:none!important}
+  .standing{animation:none!important;background-position:50% 0!important}
 }
 </style>
 </head>
@@ -598,6 +675,7 @@ footer{border-top:1px solid var(--line);padding-block:34px}
 <nav class="nav" id="nav">
   <div class="nav-in">
     <a href="#top" class="mark"><span class="pulse-dot"></span>TRK</a>
+    <span class="standing">Incoming Medical Student</span>
     <div class="nav-links">
       <a href="#record">Record</a>
       <a href="#work">Research</a>
@@ -605,8 +683,17 @@ footer{border-top:1px solid var(--line);padding-block:34px}
       <a href="#deck">Deck</a>
       <a href="#consult">Contact</a>
     </div>
+    <button class="navtoggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navDrawer" aria-label="Open menu"><i></i><i></i><i></i></button>
   </div>
   <div class="scanbar" id="scanbar"></div>
+  <div class="drawer" id="navDrawer">
+    <a href="#record">Record<span class="n">01</span></a>
+    <a href="#work">Research<span class="n">02</span></a>
+    <a href="#creds">Credentials<span class="n">03</span></a>
+    <a href="#deck">Deck<span class="n">04</span></a>
+    <a href="#consult">Contact<span class="n">05</span></a>
+    <button class="dl" id="drawerCV" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Download CV</button>
+  </div>
 </nav>
 
 <div class="wrap" id="top">
@@ -1111,6 +1198,30 @@ footer{border-top:1px solid var(--line);padding-block:34px}
   }
   window.addEventListener("scroll", onScroll, { passive:true }); onScroll();
 
+  /* ---------- mobile drawer ---------- */
+  var toggle = document.getElementById("navToggle");
+  function setMenu(open){
+    nav.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+  toggle.addEventListener("click", function(e){
+    e.stopPropagation();
+    setMenu(!nav.classList.contains("open"));
+  });
+  document.querySelectorAll("#navDrawer a").forEach(function(a){
+    a.addEventListener("click", function(){ setMenu(false); });
+  });
+  document.addEventListener("click", function(e){
+    if (nav.classList.contains("open") && !nav.contains(e.target)) setMenu(false);
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && nav.classList.contains("open")){ setMenu(false); toggle.focus(); }
+  });
+  window.addEventListener("scroll", function(){
+    if (nav.classList.contains("open")) setMenu(false);
+  }, { passive:true });
+
   /* ---------- monitor clock ---------- */
   var clock = document.getElementById("clock");
   function tick(){
@@ -1293,7 +1404,7 @@ footer{border-top:1px solid var(--line);padding-block:34px}
     cvURL = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
     return cvURL;
   }
-  if (printBtn) printBtn.addEventListener("click", function(){
+  function downloadCV(){
     try {
       var url = buildCV();
       if (!url) throw new Error("no cv");
@@ -1304,7 +1415,10 @@ footer{border-top:1px solid var(--line);padding-block:34px}
     } catch (err) {
       window.print(); /* fallback: print stylesheet renders a plain CV */
     }
-  });
+  }
+  if (printBtn) printBtn.addEventListener("click", downloadCV);
+  var drawerCV = document.getElementById("drawerCV");
+  if (drawerCV) drawerCV.addEventListener("click", function(){ downloadCV(); setMenu(false); });
 
   /* ---------- hero status cycler ---------- */
   var states = ["MS candidate", "Rutgers · 2026", "Open to research", "Atlanta, GA"];
